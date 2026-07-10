@@ -139,6 +139,7 @@ MonoBehaviour:
   maxSpeed: 300
   acceleration: 50
   bufferTime: 0.2
+  vibrationCut: 0.01
   trace: {fileID: 1032919646896192101, guid: a5d0ddabc82387b429d8df9aad9ac08e, type: 3}
 --- !u!114 &6103405284737374235
 MonoBehaviour:

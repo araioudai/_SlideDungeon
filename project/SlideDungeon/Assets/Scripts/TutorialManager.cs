@@ -210,10 +210,22 @@ public class TutorialManager : MonoBehaviour
         //現在のステージに応じた正解の方向を取得
         Vector2 targetDir = Direction(StageIndex.Instance.GetIndex());
         tutorialText.fontSize = 75;
-        tutorialText.text = "スワイプで動かそう";
+
+        if (LanguageManager.Instance != null)
+        {
+            //日本語が選択されている場合
+            if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+            {
+                tutorialText.text = "スワイプで動かそう";
+            }
+            //英語が選択されている場合
+            else
+            {
+                tutorialText.text = "Swipe to move!";
+            }
+        }
 
         //Sequenceを初期化
-        swipeSequence = DOTween.Sequence();
         swipeSequence?.Kill();                                  //既存のがあれば消す
         swipeSequence = DOTween.Sequence().SetLink(gameObject); //SetLinkを追加
 
@@ -276,7 +288,19 @@ public class TutorialManager : MonoBehaviour
     void CheckSwipe()
     {
         tutorialText.fontSize = 100;
-        tutorialText.text = "やってみよう！";
+        if (LanguageManager.Instance != null)
+        {
+            //日本語が選択されている場合
+            if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+            {
+                tutorialText.text = "やってみよう！";
+            }
+            //英語が選択されている場合
+            else
+            {
+                tutorialText.text = "Try it!";
+            }
+        }
 
         // 現在の入力方向を取得
         InputPlayerManager.OperationType input = InputPlayerManager.Instance.GetDirection();
@@ -298,7 +322,10 @@ public class TutorialManager : MonoBehaviour
             state = TutorialState.NONE;
 
             //成功時
-            Player.Instance.TutorialMove(correctDir);
+            if (Player.Instance != null)
+            {
+                Player.Instance.TutorialMove(correctDir);
+            }
             tutorialText.fontSize = 100;
             tutorialText.text = "Good!";
 
@@ -314,16 +341,34 @@ public class TutorialManager : MonoBehaviour
             //判定が何度も走らないように、一時的にステートを NONE にする
             state = TutorialState.NONE;
 
-            //正解の方向に応じてテキスト表示
-            string dirName = (correctDir == Vector2.up) ? "上" : "右";
-            tutorialText.fontSize = 75;
-            tutorialText.text = $"惜しい！{dirName}方向に\nスワイプしてみよう！";
+            if (LanguageManager.Instance != null)
+            {
+                //日本語が選択されている場合
+                if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+                {
+                    //正解の方向に応じてテキスト表示
+                    string dirName = (correctDir == Vector2.up) ? "上" : "右";
+                    tutorialText.fontSize = 75;
+                    tutorialText.text = $"惜しい！{dirName}方向に\nスワイプしてみよう！";
+                }
+                //英語が選択されている場合
+                else
+                {
+                    //正解の方向に応じてテキスト表示
+                    string dirName = (correctDir == Vector2.up) ? "UP" : "RIGHT";
+                    tutorialText.fontSize = 55; //英語は2行にすると長いからサイズを小さく
+                    tutorialText.text = $"Close! Swipe {dirName}\nto try again!";
+                }
+            }
 
             //テキストを揺らす演出
             tutorialText.transform.DOShakePosition(0.5f, 10f);
 
             //プレイヤーを初期位置に戻す
-            Player.Instance.TutorialInit();
+            if (Player.Instance != null)
+            {
+                Player.Instance.TutorialInit();
+            }
 
             //1.5秒待ってから、もう一度お手本（SHOW_SWIPE）に戻す
             delayedCallTween = DOVirtual.DelayedCall(1.5f, () => {
@@ -346,7 +391,10 @@ public class TutorialManager : MonoBehaviour
         if (goalObj != null)
         {
             //カメラのターゲットをゴールに変更
-            CameraManager.Instance.SetTarget(goalObj.transform);
+            if(CameraManager.Instance != null)
+            {
+                CameraManager.Instance.SetTarget(goalObj.transform);
+            }
 
             //全体を暗くするパネルを表示
             if (goalMaskPanel != null) goalMaskPanel.SetActive(true);
@@ -367,7 +415,20 @@ public class TutorialManager : MonoBehaviour
             Sequence goalSeq = DOTween.Sequence();
 
             tutorialText.fontSize = 70;
-            tutorialText.text = "赤の場所がゴールだよ！\nそこを目指そう！";
+
+            if (LanguageManager.Instance != null)
+            {
+                //日本語が選択されている場合
+                if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+                {
+                    tutorialText.text = "赤の場所がゴールだよ！\nそこを目指そう！";
+                }
+                //英語が選択されている場合
+                else
+                {
+                    tutorialText.text = "The red area is the goal!\nAim for it!";
+                }
+            }
 
             //ゴール本体を「ピクッ」と動かして色を変える（3回繰り返す）
             goalSeq.Append(goalObj.transform.DOScale(1.5f, 0.3f).SetEase(Ease.OutQuad)) // 少し大きく
@@ -388,7 +449,19 @@ public class TutorialManager : MonoBehaviour
             {
                 if (tutorialText == null) { return; }
 
-                tutorialText.text = "さあ冒険の始まりだ！";
+                if (LanguageManager.Instance != null)
+                {
+                    //日本語が選択されている場合
+                    if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+                    {
+                        tutorialText.text = "さあ冒険の始まりだ！";
+                    }
+                    //英語が選択されている場合
+                    else
+                    {
+                        tutorialText.text = "Let the adventure begin!";
+                    }
+                }
 
                 DOVirtual.DelayedCall(1.5f, () => {
                     //自分自身が破棄されてたら中断
@@ -411,6 +484,11 @@ public class TutorialManager : MonoBehaviour
                     tutorialBack.SetActive(false);       //テキスト背景を消す
                     Player.Instance.TutorialInit();      //プレイヤーの場所を初期位置に
                     StageIndex.Instance.SetFirst(false); //最初のプレイをオフに
+
+                    // チュートリアル完了フラグを端末に保存
+                    PlayerPrefs.SetInt("Tutorial_Cleared", 1);
+                    PlayerPrefs.Save();                  //確実に保存する
+
                     state = TutorialState.COMPLETE;      //チュートリアル終了
                 }).SetLink(gameObject);
             }).SetLink(gameObject);
@@ -435,7 +513,6 @@ public class TutorialManager : MonoBehaviour
         GameObject ring = Instantiate(target, target.transform.position, Quaternion.identity);
 
         //複製されたオブジェクトから不要な機能を削除（当たり判定やスクリプト）
-        //これを忘れると、チュートリアル中に予期せぬ衝突判定が発生する可能性がある
         Destroy(ring.GetComponent<Collider2D>());
         var tutorialScript = ring.GetComponent<TutorialManager>();
         if (tutorialScript != null) Destroy(tutorialScript);

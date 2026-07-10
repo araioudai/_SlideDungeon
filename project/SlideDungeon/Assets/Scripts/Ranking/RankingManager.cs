@@ -1,4 +1,4 @@
-using PlayFab.ClientModels;
+/*using PlayFab.ClientModels;
 using PlayFab;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,8 +17,8 @@ public class RankingManager : MonoBehaviour
     private float m_time;   //クリアタイム（秒）
     private bool m_request; //ランキング再取得リクエスト
     private string currentRankingName;
-/*    private float lastUserDataUpdateTime = -1000f;   //最後に送信した時刻
-    private const float userDataUpdateCooldown = 10f; //クールタイム（秒）*/
+*//*    private float lastUserDataUpdateTime = -1000f;   //最後に送信した時刻
+    private const float userDataUpdateCooldown = 10f; //クールタイム（秒）*//*
     #endregion
 
     #region セット関数
@@ -207,7 +207,7 @@ public class RankingManager : MonoBehaviour
     }
 
 
-    /*    void SubmitClearTime(float time)
+    *//*    void SubmitClearTime(float time)
         {
             int modifiedScore = int.MaxValue - Mathf.RoundToInt(time * 100f);
 
@@ -291,7 +291,7 @@ public class RankingManager : MonoBehaviour
         {
             Debug.Log("タイム送信 失敗: " + error.GenerateErrorReport());
         });
-    }*/
+    }*//*
 
     // ランキング取得
     void GetRanking()
@@ -344,7 +344,7 @@ public class RankingManager : MonoBehaviour
 
 
 
-/*using PlayFab.ClientModels;
+*//*using PlayFab.ClientModels;
 using PlayFab;
 using System.Collections.Generic;
 using UnityEngine;

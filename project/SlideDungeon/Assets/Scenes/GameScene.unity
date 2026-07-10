@@ -665,6 +665,7 @@ GameObject:
   - component: {fileID: 303142683}
   - component: {fileID: 303142685}
   - component: {fileID: 303142684}
+  - component: {fileID: 303142686}
   m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
@@ -724,7 +725,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u623B\u308B"
+  m_Text: Exit
 --- !u!222 &303142685
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -733,6 +734,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 303142682}
   m_CullTransparentMesh: 1
+--- !u!114 &303142686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 303142682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a22174eecc3edef4fa94355c78870185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  japaneseText: "\u623B\u308B"
+  englishText: Resume
+  japaneseFontSize: 75
+  englishFontSize: 75
 --- !u!1 &373731440
 GameObject:
   m_ObjectHideFlags: 0
@@ -974,6 +991,7 @@ GameObject:
   - component: {fileID: 429633084}
   - component: {fileID: 429633086}
   - component: {fileID: 429633085}
+  - component: {fileID: 429633087}
   m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
@@ -1033,7 +1051,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u3082\u3046\u4E00\u5EA6"
+  m_Text: RePlay
 --- !u!222 &429633086
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1042,6 +1060,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 429633083}
   m_CullTransparentMesh: 1
+--- !u!114 &429633087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 429633083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a22174eecc3edef4fa94355c78870185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  japaneseText: "\u3082\u3046\u4E00\u5EA6"
+  englishText: RePlay
+  japaneseFontSize: 75
+  englishFontSize: 75
 --- !u!1 &491304626
 GameObject:
   m_ObjectHideFlags: 0
@@ -3502,6 +3536,7 @@ GameObject:
   - component: {fileID: 1525692903}
   - component: {fileID: 1525692905}
   - component: {fileID: 1525692904}
+  - component: {fileID: 1525692906}
   m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
@@ -3561,7 +3596,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u30BF\u30A4\u30C8\u30EB\u3078"
+  m_Text: ToTitle
 --- !u!222 &1525692905
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3570,52 +3605,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1525692902}
   m_CullTransparentMesh: 1
---- !u!1 &1561178087
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1561178089}
-  - component: {fileID: 1561178088}
-  m_Layer: 0
-  m_Name: InputManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1561178088
+--- !u!114 &1525692906
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1561178087}
+  m_GameObject: {fileID: 1525692902}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c65aec8db8f35a64cbc3855953de8769, type: 3}
+  m_Script: {fileID: 11500000, guid: a22174eecc3edef4fa94355c78870185, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nameText: {fileID: 0}
-  nameInputField: {fileID: 0}
---- !u!4 &1561178089
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1561178087}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.027995, y: 0.4674503, z: 1143.9607}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  japaneseText: "\u30BF\u30A4\u30C8\u30EB\u3078"
+  englishText: ToTitle
+  japaneseFontSize: 60
+  englishFontSize: 60
 --- !u!1 &1561396787
 GameObject:
   m_ObjectHideFlags: 0
@@ -5160,7 +5165,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 480, y: 120}
+  m_SizeDelta: {x: 575, y: 120}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &2071093566
 MonoBehaviour:
@@ -5455,11 +5460,10 @@ SceneRoots:
   - {fileID: 378046516}
   - {fileID: 221051527}
   - {fileID: 1562267271}
+  - {fileID: 258348466}
   - {fileID: 373731444}
   - {fileID: 1004640144}
   - {fileID: 520693487}
   - {fileID: 1088370979}
   - {fileID: 597201177}
-  - {fileID: 258348466}
-  - {fileID: 1561178089}
   - {fileID: 491304630}

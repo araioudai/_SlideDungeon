@@ -34,7 +34,7 @@ public class UIMaskFader : MonoBehaviour
         unMask.transform.localScale = Vector3.zero;
 
         //画面が切り替わった直後の違和感を消すための短い待機
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSecondsRealtime(0.3f);
 
         //拡大アニメーション（23倍まで大きくして画面全体を見せる）
         unMask.transform.DOScale(23f, duration)
@@ -43,7 +43,7 @@ public class UIMaskFader : MonoBehaviour
             .OnComplete(() => onComplete?.Invoke()); //終わったら登録された処理を実行
 
         //アニメーション時間分だけコルーチンを待機
-        yield return new WaitForSeconds(duration);
+        yield return new WaitForSecondsRealtime(duration);
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class UIMaskFader : MonoBehaviour
             });
 
         //アニメーション時間分だけコルーチンを待機
-        yield return new WaitForSeconds(duration);
+        yield return new WaitForSecondsRealtime(duration);
     }
     #endregion
 

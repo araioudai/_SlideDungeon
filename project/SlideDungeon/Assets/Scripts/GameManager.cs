@@ -76,6 +76,9 @@ public class GameManager : MonoBehaviour
 
     private Vector2 initialCountdownPos;                      //カウントダウン用テキストの元の位置を保存する変数
 
+    //最初から時間を固定した待機用オブジェクトを作っておく（キャッシュ）
+    private WaitForSecondsRealtime resultWait = new WaitForSecondsRealtime(2.5f);
+
     #endregion
 
     #region Set関数
@@ -110,13 +113,29 @@ public class GameManager : MonoBehaviour
     /// スワイプ数カウント
     /// </summary>
     /// <param name="value">スワイプ数</param>
-    public void SlideCount(int value) { slideCount += value; swipeText.text = "スワイプ:" + slideCount.ToString("D2"); }
+    public void SlideCount(int value) 
+    { 
+        slideCount += value;
+        
+        //日本語が選択されている場合
+        if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+        {
+            swipeText.text = "スワイプ:" + slideCount.ToString("D2");
+        }
+        //英語が選択されている場合
+        else
+        {
+            swipeText.text = "Swipe:" + slideCount.ToString("D2");
+        }
+    }
 
-    /// <summary>
-    /// ゲームモードをセット
-    /// </summary>
-    /// <param name="value">現在のゲームモード</param>
-    public void SetGameMode(Modes value) { currentMode = value; }
+        
+
+/// <summary>
+/// ゲームモードをセット
+/// </summary>
+/// <param name="value">現在のゲームモード</param>
+public void SetGameMode(Modes value) { currentMode = value; }
 
     /// <summary>
     /// プレイが開始しているかどうかをセット
@@ -255,7 +274,12 @@ public class GameManager : MonoBehaviour
         gamePanel.SetActive(true);
         gameOverPanel.SetActive(false);
         pausePanel.SetActive(false);
-        swipeText.text = "スワイプ:" + slideCount.ToString("D2");
+
+        //何も入らないことがないようにいれておく
+        timeText.text = " Time: " + timer.ToString("F2");
+        swipeText.text = "Swipe:" + slideCount.ToString("D2");
+
+        StartUIInit();
 
         //最初に現在の位置（インスペクターで設定した中央など）を覚えておく
         if (countdownText != null)
@@ -268,11 +292,46 @@ public class GameManager : MonoBehaviour
             obj.SetActive(false);
         }
 
-        SliderOff();
+        ModeButtonOff();                       //視野移動用表示するか
+        StartCoroutine(ShowBannerWithDelay()); //バナーを表示
+    }
+
+    void StartUIInit()
+    {
+        if (LanguageManager.Instance == null) { return; }
+
+        //日本語が選択されている場合
+        if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+        {
+            timeText.text = "タイム: " + timer.ToString("F2");
+            swipeText.text = "スワイプ:" + slideCount.ToString("D2");
+        }
+        //英語が選択されている場合
+        else
+        {
+            timeText.text = " Time: " + timer.ToString("F2");
+            swipeText.text = "Swipe:" + slideCount.ToString("D2");
+        }
+    }
+
+    /// <summary>
+    /// バナーを表示を遅らせる処理
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator ShowBannerWithDelay()
+    {
+        //待ってから広告を表示する
+        yield return new WaitForSeconds(0.5f);
+
+        if (GoogleAdMobBanner.Instance != null)
+        {
+            GoogleAdMobBanner.Instance.BannerShow();
+            Debug.Log("ゲーム画面でバナー表示をリクエストしました");
+        }
     }
 
     #region 視野移動用の表示・非表示用
-    void SliderOff()
+    void ModeButtonOff()
     {
         int index = StageIndex.Instance.GetIndex();
         switch (index){
@@ -404,7 +463,18 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void DrawTimer()
     {
-        timeText.text = "時間: " + timer.ToString("F2");
+        if (LanguageManager.Instance == null) { return; }
+
+        //日本語が選択されている場合
+        if (LanguageManager.Instance.CurrentLanguage == LanguageManager.Language.JAPAN)
+        {
+            timeText.text = "タイム:" + timer.ToString("F2");
+        }
+        //英語が選択されている場合
+        else
+        {
+            timeText.text = " Time: " + timer.ToString("F2");
+        }
     }
 
     #endregion
@@ -444,6 +514,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void DrawPause()
     {
+        //すでにゲームが終了（クリア・ゲームオーバー）状態なら何もしない
+        if (!isStart) return;
+
         //動作停止処理
         Time.timeScale = 0f;
         isPause = true;
@@ -471,27 +544,34 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void GameClear()
     {
-        if (gameClear && !sePlay) //一度だけ実行
+        //一度だけ実行
+        if (!isStart || !gameClear || sePlay) { return; }
+
+        isStart = false;                 //最初に入力を止める
+        sePlay = true;                   //フラグを立てる
+        SoundManager.Instance.BgmStop(); //BGMを止める
+        clearTimeResult = timer;         //クリア時に一度だけクリアタイム代入
+
+        //スコア送信
+        if (OnLineRanking.Instance != null && OnLineRanking.Instance.IsLoggedIn && DebugMode.Instance.GetDebugMode())
         {
-            sePlay = true;                   //最初にフラグを立てる
-            SoundManager.Instance.BgmStop(); //BGMを止める
-            clearTimeResult = timer;
-
-            //UI表示（アニメーション付き）を一回だけ呼ぶ
-            StartCoroutine(PlayClearProduction());
-
-            clearTimeResult = timer; //クリア時に一度だけクリアタイム代入
-            if (DebugMode.Instance.GetDebugMode())
-            {
-                RankingManager.Instance.SetTime(clearTimeResult); //ランク集計用にクリアタイムをセット
-            }
-            else
-            {
-                //リザルトシーンへ遷移
-                DrawGameStatus("GameClear");
-            }
-            SoundManager.Instance.SePlay(GAMECLEAR); //ゲームクリア用サウンドが再生されてなければ再生
+            int currentStage = StageIndex.Instance.GetIndex();
+            OnLineRanking.Instance.SendScore(currentStage, clearTimeResult);
+            Debug.Log($"スコア送信開始: Stage {currentStage}, Time {clearTimeResult}");
         }
+
+        //UI表示（アニメーション付き）を一回だけ呼ぶ
+        StartCoroutine(PlayClearProduction());
+
+        if (DebugMode.Instance.GetDebugMode())
+        {
+            //RankingManager.Instance.SetTime(clearTimeResult); //ランク集計用にクリアタイムをセット
+        }
+
+        //リザルトシーンへ遷移
+        DrawGameStatus("GameClear");
+
+        SoundManager.Instance.SePlay(GAMECLEAR); //ゲームクリア用サウンドが再生されてなければ再生
     }
 
     /// <summary>
@@ -519,11 +599,15 @@ public class GameManager : MonoBehaviour
     void GameOver()
     {
         //ゲームオーバー処理
-        if (gameOver)
+        if (gameOver && !sePlay)
         {
+            isStart = false; //最初に入力を止める
             foreach (GameObject obj in gameClearObj)
             {
-                obj.SetActive(false);
+                if (obj != null)
+                {
+                    obj.SetActive(false);
+                }
             }
 
             SoundManager.Instance.BgmStop(); //BGMを止める
@@ -581,6 +665,7 @@ public class GameManager : MonoBehaviour
         countdownText.rectTransform.DOKill();
 
         Sequence overSeq = DOTween.Sequence();
+        overSeq.SetUpdate(true);
 
         //スケールを1.2倍程度に抑える、パンチを効かせる
         overSeq.Append(countdownText.transform.DOScale(1.2f, 0.4f).SetEase(Ease.OutBack))
@@ -593,6 +678,13 @@ public class GameManager : MonoBehaviour
         {
             if (fade != null)
             {
+                Time.timeScale = 1f;
+
+                if (GoogleAdMobBanner.Instance != null)
+                {
+                    GoogleAdMobBanner.Instance.BannerHide(); //バナーを消す
+                }
+
                 // 1. フェードアウト（画面を閉じる）を開始
                 // 2. 第二引数のラムダ式は、アニメーション終了後に実行される
                 StartCoroutine(fade.PlayFadeOut(data.MaskSpeed(MaskData.MaskType.OUT), () =>
@@ -600,6 +692,10 @@ public class GameManager : MonoBehaviour
                     //画面が閉じきったタイミングでシーン遷移を開始
                     StartCoroutine(ResultLoad());
                 }));
+            }
+            else
+            {
+                StartCoroutine(ResultLoad());
             }
         });
     }
@@ -624,7 +720,7 @@ public class GameManager : MonoBehaviour
     IEnumerator ResultLoad()
     {
         if (Time.timeScale == 0f) { Time.timeScale = 1f; }
-        yield return new WaitForSeconds(2.5f); //音の分空ける
+        yield return resultWait; //音の分空ける
         SceneManager.LoadScene("ResultScene");
     }
 

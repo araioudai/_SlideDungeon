@@ -1,42 +1,67 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using DG.Tweening;
+using System.Collections.Generic;
+using TMPro;
+using static UnityEngine.GraphicsBuffer;
+using Unity.VisualScripting;
 
 public class ResultManager : MonoBehaviour
 {
-    #region private•Ï”
+    #region åˆ—æŒ™å¯¾
+    enum ScoresText
+    {
+        SCORE,
+        RANK,
+        WORD,
 
-    [Header("ƒXƒRƒAƒeƒLƒXƒgƒZƒbƒg")]
+        MAX
+    }
+    #endregion
+
+    #region privateå¤‰æ•°
+
+    [Header("ãƒ©ãƒ³ã‚­ãƒ³ã‚°UIã‚»ãƒƒãƒˆ")]
+    [SerializeField] private GameObject rankingDisplayObj; //ãƒ©ãƒ³ã‚­ãƒ³ã‚°å…¨ä½“ã®è¦ª
+    [SerializeField] private TMP_Text[] top3Texts;         //1ä½ã€œ3ä½ã‚’è¡¨ç¤ºã™ã‚‹ãƒ†ã‚­ã‚¹ãƒˆ(3å€‹)
+    [SerializeField] private TMP_Text myBestRankText;      //ã€Œã‚ãªãŸã®æœ€é«˜é †ä½: ã€‡ä½ã€ç”¨
+    [Header("ã‚¹ã‚³ã‚¢è¡¨ç¤ºãªã©ã§ä½¿ã†ã‚‚ã®")]
+    [SerializeField] private GameObject[] scores;          //ã‚¹ã‚³ã‚¢è¡¨ç¤ºç”¨
+    [Header("ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒ©ãƒ³ã‚­ãƒ³ã‚°è¡¨ç¤ºæ™‚ã«éè¡¨ç¤ºã«ã™ã‚‹ã‚‚ã®")]
+    [SerializeField] private GameObject[] scoresDelete;    //ãƒ©ãƒ³ã‚­ãƒ³ã‚°è¡¨ç¤ºæ™‚ã«éè¡¨ç¤ºã«ã™ã‚‹ã‚‚ã®
+    [Header("ãƒ­ãƒ¼ãƒ‰ç”»é¢ç”¨ãƒ‘ãƒãƒ«")]
+    [SerializeField] private GameObject loadingPanel;      //ãƒ­ãƒ¼ãƒ‰ä¸­ã«å‡ºã™ãƒ‘ãƒãƒ«
+    [Header("ã‚¹ã‚³ã‚¢ãƒ†ã‚­ã‚¹ãƒˆã‚»ãƒƒãƒˆ")]
     [SerializeField] private Text scoreText;
-    [Header("ƒ‰ƒ“ƒNƒeƒLƒXƒgƒZƒbƒg")]
+    [Header("ãƒ©ãƒ³ã‚¯ãƒ†ã‚­ã‚¹ãƒˆã‚»ãƒƒãƒˆ")]
     [SerializeField] private Text rankText;
-    [Header("ƒ‰ƒ“ƒNƒ[ƒhƒeƒLƒXƒgƒZƒbƒg")]
+    [Header("ãƒ©ãƒ³ã‚¯ãƒ¯ãƒ¼ãƒ‰ãƒ†ã‚­ã‚¹ãƒˆã‚»ãƒƒãƒˆ")]
     [SerializeField] private Text wordsText;
-    [Header("ƒNƒŠƒAƒXƒe[ƒW‚Ì”Ô†ƒeƒLƒXƒgƒZƒbƒg")]
+    [Header("ã‚¯ãƒªã‚¢ã‚¹ãƒ†ãƒ¼ã‚¸ã®ç•ªå·ãƒ†ã‚­ã‚¹ãƒˆã‚»ãƒƒãƒˆ")]
     [SerializeField] private Text numberText;
-    [Header("ƒXƒRƒA•\¦—pƒpƒlƒ‹ƒZƒbƒg")]
-    [SerializeField] private GameObject scorePanel; //ƒXƒRƒA•\¦—p
-    [Header("–¼‘O“ü—Í—pƒpƒlƒ‹ƒZƒbƒg")]
-    [SerializeField] private GameObject inputPanel; //ƒ‰ƒ“ƒLƒ“ƒO‚É“o˜^‚·‚é–¼‘O“ü—Í
-    [Header("†áƒIƒuƒWƒFƒNƒg‚ğƒZƒbƒg")]
-    [SerializeField] private GameObject confetti;   //†á‚Ì•\¦”ñ•\¦—p
-    [Header("ƒQ[ƒ€ƒNƒŠƒA•\¦ƒ{ƒ^ƒ“ƒZƒbƒg")]
+    [Header("ã‚¹ã‚³ã‚¢è¡¨ç¤ºç”¨ãƒ‘ãƒãƒ«ã‚»ãƒƒãƒˆ")]
+    [SerializeField] private GameObject scorePanel; //ã‚¹ã‚³ã‚¢è¡¨ç¤ºç”¨
+    [Header("åå‰å…¥åŠ›ç”¨ãƒ‘ãƒãƒ«ã‚»ãƒƒãƒˆ")]
+    [SerializeField] private GameObject inputPanel; //ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã«ç™»éŒ²ã™ã‚‹åå‰å…¥åŠ›
+    [Header("ç´™å¹é›ªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ã‚»ãƒƒãƒˆ")]
+    [SerializeField] private GameObject confetti;   //ç´™å¹é›ªã®è¡¨ç¤ºéè¡¨ç¤ºç”¨
+    [Header("ã‚²ãƒ¼ãƒ ã‚¯ãƒªã‚¢æ™‚è¡¨ç¤ºãƒœã‚¿ãƒ³ã‚»ãƒƒãƒˆ")]
     [SerializeField] private GameObject gameClear;
-    [Header("ƒQ[ƒ€ƒI[ƒo[•\¦ƒ{ƒ^ƒ“ƒZƒbƒg")]
+    [Header("ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼æ™‚è¡¨ç¤ºãƒœã‚¿ãƒ³ã‚»ãƒƒãƒˆ")]
     [SerializeField] private GameObject gameOver;
-    [Header("SE—pƒI[ƒfƒBƒIƒ\[ƒX^–{‘Ì‚ğƒZƒbƒg")]
+    [Header("SEç”¨ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚½ãƒ¼ã‚¹ï¼æœ¬ä½“ã‚’ã‚»ãƒƒãƒˆ")]
     [SerializeField] private AudioSource seSource;
     [SerializeField] private AudioClip seDecision;
-    [Header("ƒXƒe[ƒW‚²‚Æ‚Ìƒmƒ‹ƒ}ƒf[ƒ^ƒZƒbƒg")]
+    [Header("ã‚¹ãƒ†ãƒ¼ã‚¸ã”ã¨ã®ãƒãƒ«ãƒãƒ‡ãƒ¼ã‚¿ã‚»ãƒƒãƒˆ")]
     [SerializeField] private StageData[] stageDatas;
-    [Header("ƒ}ƒXƒNƒf[ƒ^")]
+    [Header("ãƒã‚¹ã‚¯ãƒ‡ãƒ¼ã‚¿")]
     [SerializeField] private MaskData data;
-    [Header("ƒ}ƒXƒN‚ğ’u‚­ƒLƒƒƒ“ƒoƒX‚ğƒZƒbƒg")]
+    [Header("ãƒã‚¹ã‚¯ã‚’ç½®ãã‚­ãƒ£ãƒ³ãƒã‚¹ã‚’ã‚»ãƒƒãƒˆ")]
     [SerializeField] private GameObject canvasMask;
 
-    private UIMaskFader fade;                       //ƒtƒF[ƒhˆ—ƒXƒNƒŠƒvƒg
+    private UIMaskFader fade;                       //ãƒ•ã‚§ãƒ¼ãƒ‰å‡¦ç†ã‚¹ã‚¯ãƒªãƒ—ãƒˆ
 
     private float clearTime;
     private int slideCount;
@@ -46,14 +71,14 @@ public class ResultManager : MonoBehaviour
 
     #endregion
 
-    #region UnityƒCƒxƒ“ƒgŠÖ”
+    #region Unityã‚¤ãƒ™ãƒ³ãƒˆé–¢æ•°
     private void Awake()
     {
-        //ƒLƒƒƒ“ƒoƒX‚Ìq‚Æ‚µ‚ÄƒvƒŒƒnƒu‚ğ¶¬
-        //data.panelMask‚Í‰æ‘œ‚Ìˆê”Ôã‚ÌuUnmasked PanelvƒvƒŒƒnƒu‚ğw‚·‚Æ‘z’è
+        //ã‚­ãƒ£ãƒ³ãƒã‚¹ã®å­ã¨ã—ã¦ãƒ—ãƒ¬ãƒãƒ–ã‚’ç”Ÿæˆ
+        //data.panelMaskã¯ç”»åƒã®ä¸€ç•ªä¸Šã®ã€ŒUnmasked Panelã€ãƒ—ãƒ¬ãƒãƒ–ã‚’æŒ‡ã™ã¨æƒ³å®š
         GameObject maskRoot = Instantiate(data.panelMask, canvasMask.transform);
 
-        //•`‰æ‡‚ğˆê”Ôè‘O‚É
+        //æç”»é †ã‚’ä¸€ç•ªæ‰‹å‰ã«
         maskRoot.transform.SetAsLastSibling();
 
         fade = maskRoot.GetComponent<UIMaskFader>();
@@ -62,10 +87,25 @@ public class ResultManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //UIã®åˆæœŸåŒ–
+        rankingDisplayObj.SetActive(false);
+        rankingDisplayObj.transform.localScale = Vector3.zero;
+        gameClear.SetActive(false);
+        gameOver.SetActive(false);
+
+        //åˆæœŸåŒ–
         Init();
 
-        //ƒtƒF[ƒhˆ—
-        StartCoroutine(LiftFade());
+        //æ¼”å‡ºé–‹å§‹
+        if (GameManager.Instance.GetGameClear())
+        {
+            StartCoroutine(ShowResultSequence());
+        }
+        else
+        {
+            StartCoroutine(LiftFade()); //ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼æ™‚ã¯é€šå¸¸ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã®ã¿
+            gameOver.SetActive(true);
+        }
     }
 
     // Update is called once per frame
@@ -76,43 +116,59 @@ public class ResultManager : MonoBehaviour
 
     #endregion
 
-    #region StartŒÄ‚Ño‚µŠÖ”
+    #region Startå‘¼ã³å‡ºã—é–¢æ•°
     /// <summary>
-    /// ‰Šú‰»ˆ—
+    /// åˆæœŸåŒ–å‡¦ç†
     /// </summary>
     void Init()
     {
         clearTime = 0;
         clearTime = GameManager.Instance.GetClearTimer();
         slideCount = GameManager.Instance.GetSlideCount();
-        scoreText.text = "ƒNƒŠƒA@: " + clearTime.ToString("F2") + "\n\nƒXƒƒCƒv: " + slideCount;
-        if (GameManager.Instance.GetGameClear()) //ƒQ[ƒ€ƒNƒŠƒA‚Ì‰Šú‰»ˆ—
+        //UIã®åˆæœŸçŠ¶æ…‹ã‚’ã€Œéš ã™ã€è¨­å®šã«ã™ã‚‹
+        rankingDisplayObj.SetActive(false);
+        loadingPanel.SetActive(false);
+        for (int i = 0; i < (int)ScoresText.MAX; i++)
         {
-            //†á‚ğ•\¦
-            confetti.SetActive(true);
-            //ƒ‰ƒ“ƒN‚É‚æ‚Á‚½ƒeƒLƒXƒg‚ğ•\¦
-            RankMeasurement();
-            //ƒŠƒUƒ‹ƒgó‹µ‚É‰‚¶‚½ƒpƒlƒ‹‚ğ•\¦
-            gameOver.SetActive(false);
-            gameClear.SetActive(true);
+            scores[i].SetActive(false);
         }
-        else //ƒQ[ƒ€ƒI[ƒo[‚Ì‰Šú‰»ˆ—
+        rankingDisplayObj.transform.localScale = Vector3.zero;
+
+        //ã‚¹ã‚³ã‚¢ãƒ†ã‚­ã‚¹ãƒˆã‚’ç©ºã«
+        scoreText.text = "";
+
+        //ã‚¹ã‚¿ãƒ³ãƒ—ãƒ†ã‚­ã‚¹ãƒˆã‚’ã‚ã‚‰ã‹ã˜ã‚é€æ˜ã«ã—ã¦ãŠã
+        Color rCol = rankText.color;
+        rCol.a = 0;
+        rankText.color = rCol;
+
+        Color wCol = wordsText.color;
+        wCol.a = 0;
+        wordsText.color = wCol;
+
+        scoreText.text = "Time : 0.00\n\nSwipe : 0";
+
+        if (GameManager.Instance.GetGameClear()) //ã‚²ãƒ¼ãƒ ã‚¯ãƒªã‚¢æ™‚ã®åˆæœŸåŒ–å‡¦ç†
         {
-            //ƒeƒLƒXƒg‚ğ•\¦‚µ‚È‚¢
+            //ç´™å¹é›ªã‚’è¡¨ç¤º
+            confetti.SetActive(true);
+            //ãƒ©ãƒ³ã‚¯ã«ã‚ˆã£ãŸãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤º
+            RankMeasurement();
+        }
+        else //ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼æ™‚ã®åˆæœŸåŒ–å‡¦ç†
+        {
+            //ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤ºã—ãªã„
             rankText.text = ""; 
             wordsText.text = "";
-            //†á‚ğ”ñ•\¦
+            //ç´™å¹é›ªã‚’éè¡¨ç¤º
             confetti.SetActive(false);
-            //ƒŠƒUƒ‹ƒgó‹µ‚É‰‚¶‚½ƒpƒlƒ‹‚ğ•\¦
-            gameClear.SetActive(false);
-            gameOver.SetActive(true);
         }
         int stage = StageIndex.Instance.GetIndex();
         numberText.text = "Stage" + stage;
-        if (OffLineRankingManager.Instance.IsHightScore(stage, clearTime) && GameManager.Instance.GetGameClear())
+        if (!DebugMode.Instance.GetDebugMode() && OffLineRankingManager.Instance.IsHightScore(stage, clearTime) && GameManager.Instance.GetGameClear())
         {
-            inputPanel.SetActive(true); //–¼‘O“ü—Íƒpƒlƒ‹•\¦
-            //Time.timeScale = 0f;        //–¼‘O“ü—Í’†‚Í~‚ß‚é
+            inputPanel.SetActive(true); //åå‰å…¥åŠ›ãƒ‘ãƒãƒ«è¡¨ç¤º
+            //Time.timeScale = 0f;        //åå‰å…¥åŠ›ä¸­ã¯æ­¢ã‚ã‚‹
         }
         else
         {
@@ -121,104 +177,271 @@ public class ResultManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ‰ƒ“ƒN”»’è‚Æ•¶š”½‰f
+    /// ãƒ©ãƒ³ã‚¯åˆ¤å®šã¨æ–‡å­—åæ˜ 
     /// </summary>
     void RankMeasurement()
     {
-        //Œ»İ‚ÌƒXƒe[ƒW”Ô†‚ğæ“¾
+        //ç¾åœ¨ã®ã‚¹ãƒ†ãƒ¼ã‚¸ç•ªå·ã‚’å–å¾—
         stageNumber = StageIndex.Instance.GetIndex();
-        //ŠY“–ƒXƒe[ƒW‚ÌŠî€ƒf[ƒ^‚ğæ“¾
+        //è©²å½“ã‚¹ãƒ†ãƒ¼ã‚¸ã®åŸºæº–ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
         StageData data = stageDatas[stageNumber - 1];
-        //Sƒ‰ƒ“ƒNŠî€ƒ^ƒCƒ€
+        //Sãƒ©ãƒ³ã‚¯åŸºæº–ã‚¿ã‚¤ãƒ 
         baseTime = data.baseTime;
-        //Sƒ‰ƒ“ƒNŠî€ƒXƒ‰ƒCƒh”
+        //Sãƒ©ãƒ³ã‚¯åŸºæº–ã‚¹ãƒ©ã‚¤ãƒ‰æ•°
         baseSlide = data.baseSlide;
 
-        //ƒXƒRƒAŒvZ
-        //Še€–Ú‚ğŠî€’l‚Å³‹K‰»‚·‚éF1.0‚ªŠî€’B¬A1.0–¢–‚È‚çŠî€‚æ‚è—Ç‚¢
-        float timeNorm = clearTime / baseTime;               //ƒ^ƒCƒ€‚ÌŠî€’B¬“x
-        float slideNorm = (float)slideCount / baseSlide;     //ƒXƒ‰ƒCƒh”‚ÌŠî€’B¬“x
-        float score = timeNorm + slideNorm;                  //‡ŒvƒXƒRƒAi¬‚³‚¢‚Ù‚Ç‚¬Ñj2.0‚ªƒsƒbƒ^ƒŠ
+        //ã‚¹ã‚³ã‚¢è¨ˆç®—
+        //å„é …ç›®ã‚’åŸºæº–å€¤ã§æ­£è¦åŒ–ã™ã‚‹ï¼š1.0ãŒåŸºæº–é”æˆã€1.0æœªæº€ãªã‚‰åŸºæº–ã‚ˆã‚Šè‰¯ã„
+        float timeNorm = clearTime / baseTime;               //ã‚¿ã‚¤ãƒ ã®åŸºæº–é”æˆåº¦
+        float slideNorm = (float)slideCount / baseSlide;     //ã‚¹ãƒ©ã‚¤ãƒ‰æ•°ã®åŸºæº–é”æˆåº¦
+        float score = timeNorm + slideNorm;                  //åˆè¨ˆã‚¹ã‚³ã‚¢ï¼ˆå°ã•ã„ã»ã©é«˜æˆç¸¾ï¼‰2.0ãŒãƒ”ãƒƒã‚¿ãƒª
 
-        //ƒ‰ƒ“ƒN”»’èifloat‚Åè‡’l‚ğ’²®j
-        //Šeƒ‰ƒ“ƒN‚Ìè‡’l‚ğ’´‚¦‚È‚¢‚©‚Å”»’èB’l‚ª¬‚³‚¢‚Ù‚Ç—Ç‚¢ƒ‰ƒ“ƒN‚É‚È‚é
+        //ãƒ©ãƒ³ã‚¯åˆ¤å®šï¼ˆfloatã§é–¾å€¤ã‚’èª¿æ•´ï¼‰
+        //å„ãƒ©ãƒ³ã‚¯ã®é–¾å€¤ã‚’è¶…ãˆãªã„ã‹ã§åˆ¤å®šã€‚å€¤ãŒå°ã•ã„ã»ã©è‰¯ã„ãƒ©ãƒ³ã‚¯ã«ãªã‚‹
         if (score <= 2.0f)
         {
-            //Sƒ‰ƒ“ƒNFƒ^ƒCƒ€EƒXƒ‰ƒCƒh‚Æ‚à‚ÉŠî€’lƒsƒbƒ^ƒŠ‚©A‚»‚êˆÈ‰º‚ÅƒNƒŠƒA
+            //Sãƒ©ãƒ³ã‚¯ï¼šã‚¿ã‚¤ãƒ ãƒ»ã‚¹ãƒ©ã‚¤ãƒ‰ã¨ã‚‚ã«åŸºæº–å€¤ãƒ”ãƒƒã‚¿ãƒªã‹ã€ãã‚Œä»¥ä¸‹ã§ã‚¯ãƒªã‚¢
             rankText.color = new Color32(255, 196, 0, 255);
             wordsText.color = new Color32(255, 196, 0, 255);
             rankText.text = "S";  
-            wordsText.text = "_˜b‹‰ƒXƒ‰ƒCƒ€";
+            wordsText.text = "ç¥è©±ç´šã‚¹ãƒ©ã‚¤ãƒ ";
         }
         else if (score <= 2.2f)
         {
-            //Aƒ‰ƒ“ƒNFŠî€’l‚æ‚è­‚µ‘½‚¢ê‡
+            //Aãƒ©ãƒ³ã‚¯ï¼šåŸºæº–å€¤ã‚ˆã‚Šå°‘ã—å¤šã„å ´åˆ
             rankText.color = new Color32(255, 57, 67, 255);
             wordsText.color = new Color32(255, 57, 67, 255);
             rankText.text = "A";   
-            wordsText.text = "‰p—Y‹‰ƒXƒ‰ƒCƒ€";
+            wordsText.text = "è‹±é›„ç´šã‚¹ãƒ©ã‚¤ãƒ ";
         }
         else if (score <= 2.4f)
         {
-            //Bƒ‰ƒ“ƒN : A‚æ‚è­‚µ‘½‚¢ê‡
+            //Bãƒ©ãƒ³ã‚¯ : Aã‚ˆã‚Šå°‘ã—å¤šã„å ´åˆ
             rankText.color = new Color32(0, 72, 255, 255);
             wordsText.color = new Color32(0, 72, 255, 255);
             rankText.text = "B";  
-            wordsText.text = "n—ûƒXƒ‰ƒCƒ€";
+            wordsText.text = "ç†Ÿç·´ã‚¹ãƒ©ã‚¤ãƒ ";
         }
         else if (score <= 2.6f)
         {
-            //Cƒ‰ƒ“ƒN : B‚æ‚è­‚µ‘½‚¢ê‡
+            //Cãƒ©ãƒ³ã‚¯ : Bã‚ˆã‚Šå°‘ã—å¤šã„å ´åˆ
             rankText.color = new Color32(0, 255, 40, 255);
             wordsText.color = new Color32(0, 255, 40, 255);
             rankText.text = "C";  
-            wordsText.text = "V•ÄƒXƒ‰ƒCƒ€";
-            //C Dƒ‰ƒ“ƒN‚Í†á‚ğ”ñ•\¦
+            wordsText.text = "æ–°ç±³ã‚¹ãƒ©ã‚¤ãƒ ";
+            //C Dãƒ©ãƒ³ã‚¯ã¯ç´™å¹é›ªã‚’éè¡¨ç¤º
             confetti.SetActive(false);
         }
         else
         {
-            //Dƒ‰ƒ“ƒNFC‚æ‚è‚³‚ç‚ÉƒXƒRƒA‚ª‘å‚«‚¢ê‡
+            //Dãƒ©ãƒ³ã‚¯ï¼šCã‚ˆã‚Šã•ã‚‰ã«ã‚¹ã‚³ã‚¢ãŒå¤§ãã„å ´åˆ
             rankText.color = new Color32(203, 0, 255, 255);
             wordsText.color = new Color32(203, 0, 255, 255);
             rankText.text = "D";  
-            wordsText.text = "ƒXƒ‰ƒCƒ€‚Ì—‘";
-            //C Dƒ‰ƒ“ƒN‚Í†á‚ğ”ñ•\¦
+            wordsText.text = "ã‚¹ãƒ©ã‚¤ãƒ ã®åµ";
+            //C Dãƒ©ãƒ³ã‚¯ã¯ç´™å¹é›ªã‚’éè¡¨ç¤º
             confetti.SetActive(false);
         }
     }
 
-    #region ‰‰oƒƒWƒbƒN
     /// <summary>
-    /// ƒtƒF[ƒhˆ—
+    /// æ¼”å‡ºã‚ã‚Šã®çµæœè¡¨ç¤º
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ShowResultSequence()
+    {
+        //ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³
+        yield return fade.PlayFadeIn(data.MaskSpeed(MaskData.MaskType.IN));
+
+        //è£ã§ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿ã®å–å¾—ã‚’é–‹å§‹
+        bool isDataLoaded = false;
+        List<ScoreEntry> rankingList = new List<ScoreEntry>();
+        int onlineMyRank = -1;
+        int stage = StageIndex.Instance.GetIndex();
+
+        if (DebugMode.Instance.GetDebugMode())
+        {
+            //PlayerPrefsã‹ã‚‰ä¿å­˜ã•ã‚Œã¦ã„ã‚‹ã‚ªãƒ³ãƒ©ã‚¤ãƒ³ç”¨IDã‚’å–å¾—
+            string myId = PlayerPrefs.GetString("OnlineUserID", "");
+
+            //ã€ã‚ªãƒ³ãƒ©ã‚¤ãƒ³ã€‘é€šä¿¡é–‹å§‹
+            OnLineRanking.Instance.GetResultRanking(stage, myId, (list, myRank) => {
+                rankingList = list;
+                onlineMyRank = myRank;
+                isDataLoaded = true;
+            });
+        }
+        else
+        {
+            //ã€ã‚ªãƒ•ãƒ©ã‚¤ãƒ³ã€‘ãƒ­ãƒ¼ã‚«ãƒ«ã‹ã‚‰å–å¾—
+            rankingList = OffLineRankingManager.Instance.GetRanking(stage);
+            isDataLoaded = true;
+        }
+
+        //ã‚¹ã‚³ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚¢ãƒƒãƒ—ï¼ˆ0ã‹ã‚‰å§‹ã¾ã‚‹ï¼‰
+        yield return StartCoroutine(ScoreCountUpRoutine());
+        yield return new WaitForSeconds(0.3f);
+
+        //ãƒ©ãƒ³ã‚¯ã¨è‚©æ›¸ãã‚¹ã‚¿ãƒ³ãƒ—
+        yield return StartCoroutine(StampRoutine(rankText.transform, wordsText.transform));
+        yield return new WaitForSeconds(0.2f);
+
+        //æ¼”å‡ºãŒçµ‚ã‚ã£ãŸæ™‚ç‚¹ã§ã¾ã ãƒ‡ãƒ¼ã‚¿ãŒå±Šã„ã¦ã„ãªã‘ã‚Œã°ã€ã“ã“ã§ãƒ­ãƒ¼ãƒ‰ãƒ‘ãƒãƒ«ã‚’è¡¨ç¤º
+        if (!isDataLoaded)
+        {
+            loadingPanel.SetActive(true);
+        }
+
+        //ãƒ©ãƒ³ã‚­ãƒ³ã‚°è¡¨ç¤º
+        yield return new WaitUntil(() => isDataLoaded);
+
+        //ãƒ­ãƒ¼ãƒ‰ãŒå®Œäº†ã—ãŸã‚‰éè¡¨ç¤º
+        loadingPanel.SetActive(false);
+
+        SetRankingUI(rankingList, onlineMyRank);
+
+        rankingDisplayObj.SetActive(true);
+        rankingDisplayObj.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack);
+    }
+
+    #region å„æ¼”å‡ºãƒ«ãƒ¼ãƒãƒ³
+
+    /// <summary>
+    /// ãƒ•ã‚§ãƒ¼ãƒ‰å‡¦ç†
     /// </summary>
     /// <returns></returns>
     private IEnumerator LiftFade()
     {
-        //ƒtƒF[ƒhˆ—
+        //ãƒ•ã‚§ãƒ¼ãƒ‰å‡¦ç†
         yield return fade.PlayFadeIn(data.MaskSpeed(MaskData.MaskType.IN));
+    }
+
+    /// <summary>
+    /// ã‚¹ã‚³ã‚¢è¡¨ç¤ºå‡¦ç†
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ScoreCountUpRoutine()
+    {
+        float dTime = 0;
+        int dSwipe = 0;
+        bool isDone = false;
+
+        scores[(int)ScoresText.SCORE].SetActive(true);
+
+        //é–‹å§‹å‰ã«ãƒªã‚»ãƒƒãƒˆ
+        scoreText.text = "Time : 0.00\n\nSwipe : 0";
+
+        DOTween.To(() => 0f, x => dTime = x, clearTime, 1.0f).SetEase(Ease.OutQuad);
+        DOTween.To(() => 0, x => dSwipe = x, slideCount, 1.0f).SetEase(Ease.OutQuad)
+            .OnUpdate(() => {
+                scoreText.text = $"Time : {dTime:F2}\n\nSwipe : {dSwipe}";
+            })
+            .OnComplete(() => isDone = true);
+
+        yield return new WaitUntil(() => isDone);
+        
+        //å®Œäº†æ™‚ã«å°‘ã—å¼·èª¿
+        scoreText.transform.DOPunchScale(Vector3.one * 0.1f, 0.3f);
+    }
+
+    /// <summary>
+    /// ã‚¹ã‚¿ãƒ³ãƒ—ã§ãƒ©ãƒ³ã‚¯ã‚„è‚©æ›¸ã®è¡¨ç¤º
+    /// </summary>
+    /// <param name="rank">ãƒ©ãƒ³ã‚¯ãƒ†ã‚­ã‚¹ãƒˆ</param>
+    /// <param name="title">è‚©æ›¸ãƒ†ã‚­ã‚¹ãƒˆ</param>
+    /// <returns></returns>
+    private IEnumerator StampRoutine(Transform rank, Transform title)
+    {
+        Transform[] target = { rank, title };
+        for (int i = 0; i < 2; i++)
+        {
+            Text t = target[i].GetComponent<Text>();
+
+            scores[i + 1].SetActive(true);
+
+            //ã‚¹ã‚¿ãƒ³ãƒ—å‰ã®æº–å‚™ï¼šå¤§ããã—ã¦é€æ˜åº¦ã¯ç¶­æŒ
+            target[i].localScale = Vector3.one * 3f;
+
+            //æŒ¯ã‚Šä¸‹ã‚ã™ç¬é–“ã«é€æ˜åº¦ã‚’1ã«ã™ã‚‹
+            t.DOFade(1f, 0.1f);
+
+            yield return target[i].DOScale(Vector3.one, 0.2f).SetEase(Ease.InBack).WaitForCompletion();
+
+            //ç€åœ°è¡æ’ƒ
+            target[i].DOPunchScale(Vector3.one * 0.2f, 0.3f);
+        }
+        //seSource.PlayOneShot(seStamp);
+    }
+
+    private void SetRankingUI(List<ScoreEntry> list, int onlineMyRank)
+    {
+        foreach (GameObject sc in scoresDelete)
+        {
+            sc.SetActive(false);
+        }
+
+        if (GameManager.Instance.GetGameClear())
+        {
+            gameClear.SetActive(true);
+        }
+        else
+        {
+            gameOver.SetActive(true);
+        }
+
+        //Top3ã®è¡¨ç¤º
+        for (int i = 0; i < top3Texts.Length; i++)
+        {
+            if (i < list.Count)
+                top3Texts[i].text = $"{i + 1}ä½: {list[i].playerName} ({list[i].clearTime:F2}s)";
+            else
+                top3Texts[i].text = $"{i + 1}ä½: ---";
+        }
+
+        int myRank;
+
+        if (DebugMode.Instance.GetDebugMode())
+        {
+            //ã‚ªãƒ³ãƒ©ã‚¤ãƒ³æ™‚ã¯ã€GASãŒå…¨ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰å‰²ã‚Šå‡ºã—ã¦ãã‚ŒãŸé †ä½ã‚’ãã®ã¾ã¾é©ç”¨
+            myRank = onlineMyRank;
+        }
+        else
+        {
+            //ãƒ­ãƒ¼ã‚«ãƒ«ã®ãƒªã‚¹ãƒˆã‹ã‚‰åå‰ãŒä¸€è‡´ã™ã‚‹è¦ç´ ã‚’æ¢ã™
+            myRank = list.FindIndex(x => x.playerName == InputManager.playerName) + 1;
+        }
+
+        //é †ä½ã®è¡¨ç¤º
+        if (myRank > 0)
+        { 
+            myBestRankText.text = $"YourRank: {myRank}"; 
+        }
+        else
+        {
+            myBestRankText.text = $"YourRank: -";
+        }
     }
 
     #endregion
 
     #endregion
 
-    #region Ÿ‚ÌƒXƒe[ƒW‚Ö
+    #region æ¬¡ã®ã‚¹ãƒ†ãƒ¼ã‚¸ã¸
     public void PushNext()
     {
         seSource.PlayOneShot(seDecision);
         StageIndex.Instance.SetNextIndex(1);
-        // 1. ƒtƒF[ƒhƒAƒEƒgi‰æ–Ê‚ğ•Â‚¶‚éj‚ğŠJn
-        // 2. ‘æ“ñˆø”‚Ìƒ‰ƒ€ƒ_®‚ÍAƒAƒjƒ[ƒVƒ‡ƒ“I—¹Œã‚ÉÀs‚³‚ê‚é
+        // 1. ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆï¼ˆç”»é¢ã‚’é–‰ã˜ã‚‹ï¼‰ã‚’é–‹å§‹
+        // 2. ç¬¬äºŒå¼•æ•°ã®ãƒ©ãƒ ãƒ€å¼ã¯ã€ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†å¾Œã«å®Ÿè¡Œã•ã‚Œã‚‹
         StartCoroutine(fade.PlayFadeOut(data.MaskSpeed(MaskData.MaskType.OUT), () =>
         {
-            //‰æ–Ê‚ª•Â‚¶‚«‚Á‚½ƒ^ƒCƒ~ƒ“ƒO‚ÅƒV[ƒ“‘JˆÚ‚ğŠJn
+            //ç”»é¢ãŒé–‰ã˜ãã£ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§ã‚·ãƒ¼ãƒ³é·ç§»ã‚’é–‹å§‹
             StartCoroutine(GameSceneLoad());
         }));
     }
     #endregion
 
-    #region ƒQ[ƒ€ƒŠƒXƒ^[ƒg
+    #region ã‚²ãƒ¼ãƒ ãƒªã‚¹ã‚¿ãƒ¼ãƒˆ
 
     public void GameReStart()
     {
@@ -226,14 +449,14 @@ public class ResultManager : MonoBehaviour
 
         StartCoroutine(fade.PlayFadeOut(data.MaskSpeed(MaskData.MaskType.OUT), () =>
         {
-            //‰æ–Ê‚ª•Â‚¶‚«‚Á‚½ƒ^ƒCƒ~ƒ“ƒO‚ÅƒV[ƒ“‘JˆÚ‚ğŠJn
+            //ç”»é¢ãŒé–‰ã˜ãã£ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§ã‚·ãƒ¼ãƒ³é·ç§»ã‚’é–‹å§‹
             StartCoroutine(GameSceneLoad());
         }));
     }
 
     #endregion
 
-    #region ƒ^ƒCƒgƒ‹‚Ö‚ª‰Ÿ‚³‚ê‚½
+    #region ã‚¿ã‚¤ãƒˆãƒ«ã¸ãŒæŠ¼ã•ã‚ŒãŸ
 
     public void PushTitle()
     {
@@ -242,22 +465,22 @@ public class ResultManager : MonoBehaviour
 
         StartCoroutine(fade.PlayFadeOut(data.MaskSpeed(MaskData.MaskType.OUT), () =>
         {
-            //‰æ–Ê‚ª•Â‚¶‚«‚Á‚½ƒ^ƒCƒ~ƒ“ƒO‚ÅƒV[ƒ“‘JˆÚ‚ğŠJn
+            //ç”»é¢ãŒé–‰ã˜ãã£ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§ã‚·ãƒ¼ãƒ³é·ç§»ã‚’é–‹å§‹
             StartCoroutine(TitleSceneLoad());
         }));
     }
 
     #endregion
 
-    #region –¼‘O‚ªŒˆ’è‚³‚ê‚½‚ç
+    #region åå‰ãŒæ±ºå®šã•ã‚ŒãŸã‚‰
 
     public void NameEnter()
     {
-        //ƒ‰ƒ“ƒLƒ“ƒO“o˜^ˆ—
+        //ãƒ©ãƒ³ã‚­ãƒ³ã‚°ç™»éŒ²å‡¦ç†
         int stage = StageIndex.Instance.GetIndex();
         OffLineRankingManager.Instance.AddScore(stage, InputManager.playerName, clearTime);
 
-        //“ü—Íƒpƒlƒ‹‚ğ•Â‚¶‚ÄŠÔ‚ğÄŠJ
+        //å…¥åŠ›ãƒ‘ãƒãƒ«ã‚’é–‰ã˜ã¦æ™‚é–“ã‚’å†é–‹
         inputPanel.SetActive(false);
         Time.timeScale = 1f;
 
@@ -267,7 +490,7 @@ public class ResultManager : MonoBehaviour
 
     #endregion
 
-    #region ƒQ[ƒ€ƒV[ƒ“ƒ[ƒh’x‰„—p
+    #region ã‚²ãƒ¼ãƒ ã‚·ãƒ¼ãƒ³ãƒ­ãƒ¼ãƒ‰é…å»¶ç”¨
     IEnumerator GameSceneLoad()
     {
         yield return new WaitForSeconds(0.5f);
@@ -275,7 +498,7 @@ public class ResultManager : MonoBehaviour
     }
     #endregion
 
-    #region ƒ^ƒCƒgƒ‹ƒV[ƒ“ƒ[ƒh’x‰„—p
+    #region ã‚¿ã‚¤ãƒˆãƒ«ã‚·ãƒ¼ãƒ³ãƒ­ãƒ¼ãƒ‰é…å»¶ç”¨
     IEnumerator TitleSceneLoad()
     {
         yield return new WaitForSeconds(0.5f);

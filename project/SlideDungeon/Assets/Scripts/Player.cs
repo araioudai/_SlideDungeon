@@ -1,5 +1,5 @@
 using DG.Tweening;
-using PlayFab.DataModels;
+//using PlayFab.DataModels;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
@@ -10,11 +10,6 @@ public class Player : MonoBehaviour
 {
     #region シングルトン（他のスクリプトからInstanceでアクセスできるようにする）
     public static Player Instance { get; private set; }
-    #endregion
-
-    #region 定数
-  
-
     #endregion
 
     #region private変数
@@ -289,6 +284,14 @@ public class Player : MonoBehaviour
                     CameraManager.Instance.CameraShake(0.1f, 0.2f);
                 }
 
+                // 「ゲームクリアかオーバーしていない」かつ「設定で振動がON」のときだけ実行
+                if ((!GameManager.Instance.GetGameClear() || !IsHitHole()) && PlayerSetting.Instance.GetVibration())
+                {
+#if UNITY_ANDROID || UNITY_IOS
+                    Vibration.VibratePop();
+#endif
+                }
+
                 shakeCount = 0;
             }
             //壁に当たっていたらフラグなどをリセット
@@ -304,14 +307,6 @@ public class Player : MonoBehaviour
                 isMove = true;        //移動開始
                 moveBuffered = false; //移動可能かのフラグを不可能に
                 //canJump = true;
-            }
-
-            if (!GameManager.Instance.GetGameClear() || !IsHitHole())
-            {
-                if (GameManager.Instance.GetGameClear() || !PlayerSetting.Instance.GetVibration()) { return; }
-#if UNITY_ANDROID || UNITY_IOS
-                Handheld.Vibrate();
-#endif
             }
 
             return;
@@ -527,7 +522,7 @@ public class Player : MonoBehaviour
     {
         if (IsHitGoal())
         {
-            GameManager.Instance.SetGameClear(IsHitGoal());
+            GameManager.Instance.SetGameClear(true);
         }
     }
 
@@ -538,7 +533,7 @@ public class Player : MonoBehaviour
     {
         if (IsHitHole())
         {
-            GameManager.Instance.SetGameOver(IsHitHole());
+            GameManager.Instance.SetGameOver(true);
         }
     }
 

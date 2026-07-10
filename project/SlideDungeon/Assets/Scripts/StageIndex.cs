@@ -28,12 +28,6 @@ public class StageIndex : MonoBehaviour
     public void SetNextIndex(int index) { stageIndex += index; if (stageIndex > 14) stageIndex = 1; }
 
     /// <summary>
-    /// ステージ番号を前へ（ランキングパネルなど）
-    /// </summary>
-    /// <param name="index">現在のステージ番号</param>
-    public void SetBeforeIndex(int index) { stageIndex -= index; if (stageIndex < 1) stageIndex = 14; }
-
-    /// <summary>
     /// 最初のプレイかどうかセット用
     /// </summary>
     /// <param name="first"></param>
@@ -89,10 +83,32 @@ public class StageIndex : MonoBehaviour
     #region Start呼び出し関数
     void Init()
     {
-/*        if (SceneManager.GetActiveScene().name == "TitleScene")
+        //オンラインモード（debugMode == true）のときだけ保存データをロード
+        if (DebugMode.Instance != null && DebugMode.Instance.GetDebugMode())
+        {
+            LoadTutorialProgress();
+        }
+/*        else
+        {
+            //オフライン（展示会モード）なら、毎回強制的にチュートリアルを有効にする
+            firstTime = true;
+        }*/
+    }
+
+    /// <summary>
+    /// オンライン用：PlayerPrefsからチュートリアル完了状態を読み込む
+    /// </summary>
+    private void LoadTutorialProgress()
+    {
+        //すでにクリアしていれば、firstTimeをfalse にしてチュートリアルをスキップ
+        if (PlayerPrefs.GetInt("Tutorial_Cleared", 0) == 1)
         {
             firstTime = false;
-        }*/
+        }
+        else
+        {
+            firstTime = true;
+        }
     }
     #endregion
 }
